@@ -14,6 +14,9 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
     }
 }
+plugins {
+    id 'com.palantir.docker' version '0.19.2'
+}
 
 group 'io.yborysiuk'
 version '1.0'
@@ -37,6 +40,21 @@ compileKotlin {
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+bootJar {
+    group = 'fair18'
+    baseName = 'backend' //baseName should be identical to jar file "demokube-0.0.1.jar:demokube"
+}
+
+docker {
+    name "${bootJar.group}/${bootJar.baseName}:${project.version}"
+    tags 'latest'
+    dockerfile file('./Dockerfile')
+    files jar.archivePath
+    buildArgs(['JAR_FILE': "${jar.archiveName}"])
+    pull true
+    noCache true
 }
 
 test {
